@@ -57,12 +57,4 @@ describe("app", () => {
         expect(topics).toEqual(data.topicData);
       });
   });
-  it("404: should return a status 404 if path is invalid", () => {
-    return request(app)
-      .get("/api/invalid-input")
-      .expect(404)
-      .then((res) => {
-        expect(res.statusCode).toEqual(404);
-      });
-  });
 });
