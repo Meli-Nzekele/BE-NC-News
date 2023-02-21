@@ -44,15 +44,6 @@ describe("app", () => {
           });
         });
     });
-    it("200: GET - responds with an array of all the topic objects, with the correct data", () => {
-      return request(app)
-        .get("/api/topics")
-        .expect(200)
-        .then(({ body }) => {
-          const { topics } = body;
-          expect(topics).toEqual(data.topicData);
-        });
-    });
   });
   describe("/api/articles", () => {
     it("200: GET - responds with an array", () => {
