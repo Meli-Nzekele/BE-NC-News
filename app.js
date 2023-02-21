@@ -1,18 +1,30 @@
 const express = require("express");
-const { getTopics, getArticles } = require("./controllers/controllers");
-
+const {
+  getTopics,
+  getArticles,
+  getArticleById,
+} = require("./controllers/controllers");
+const {
+  handle404Status,
+  handlePSQL400Status,
+  handleCustomErrors,
+} = require("./controllers/errorHandlingControllers");
 const app = express();
 
-app.get("/api", (req, res) => {
-  res.status(200).send({ message: "server ok" });
+app.get("/api", (request, response) => {
+  response.status(200).send({ message: "server ok" });
 });
 
 app.get("/api/topics", getTopics);
 
 app.get("/api/articles", getArticles);
 
-app.use((req, res, next) => {
-  res.status(404).send({ msg: "path not found" });
-});
+app.get("/api/articles/:article_id", getArticleById);
+
+app.use(handle404Status);
+
+app.use(handlePSQL400Status);
+
+app.use(handleCustomErrors);
 
 module.exports = app;
