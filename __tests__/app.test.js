@@ -98,6 +98,39 @@ describe("app", () => {
           expect(articles).toBeSorted("created_at");
         });
     });
+    describe("/api/articles/:article_id/comments", () => {
+      it.skip("200: responds with an array of comments for the correct article", () => {
+        return request(app)
+          .get("/api/articles/1/comments")
+          .expect(200)
+          .then((response) => {
+            console.log(response, "<<< response");
+            const { comments } = body;
+            expect(comments).toBeInstanceOf(Array);
+            expect(comments.length).toBeGreaterThan(0);
+            comments.forEach((comment) => {
+              expect(comment).toMatchObject({
+                comment_id: expect.any(Number),
+                body: expect.any(String),
+                votes: expect.any(Number),
+                author: expect.any(String),
+                article_id: expect.any(Number),
+                created_at: expect.any(String),
+              });
+            });
+          });
+      });
+    });
+    it.skip("200: GET - responds with an array of comments for the correct article, ordered by date descending", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          const { comments } = body;
+          expect(comments).toBeSorted("created_at");
+        });
+    });
+    // check sad path is covered
     describe("server errors", () => {
       it("404: responds with message when sent a valid but non-existent path", () => {
         return request(app)

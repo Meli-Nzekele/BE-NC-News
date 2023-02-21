@@ -16,3 +16,14 @@ exports.fetchArticles = () => {
       return result.rows;
     });
 };
+
+exports.fetchCommentsByArticleId = (article_id) => {
+  return db
+    .query(
+      `SELECT comments.* FROM comments WHERE comments.article_id = $1 ORDER BY created_at DESC;`,
+      [article_id]
+    )
+    .then((result) => {
+      return result.rows;
+    });
+};
