@@ -65,7 +65,7 @@ describe("app", () => {
           expect(articles.length).toBeGreaterThan(0);
         });
     });
-    it("200: GET - responds with an array of all the article objects, with the correct properties, including comment_count and ordered by date descending", () => {
+    it("200: GET - responds with an array of all the article objects, with the correct properties, including comment_count", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
@@ -104,6 +104,15 @@ describe("app", () => {
               article_img_url: expect.any(String),
               comment_count: expect.any(String),
             });
+          });
+      });
+      it("200: GET - responds with an array of all the article objects, ordered by date descending", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body }) => {
+            const { articles } = body;
+            expect(articles).toBeSorted("created_at");
           });
       });
     });
