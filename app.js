@@ -1,9 +1,6 @@
 const express = require("express");
-const { getTopics, getArticles } = require("./controllers");
-const {
-  handle404Status,
-  handle500Status,
-} = require("./errorHandlingControllers");
+const { getTopics, getArticles } = require("./controllers/controllers");
+
 const app = express();
 
 app.use(express.json());
@@ -15,9 +12,5 @@ app.get("/api", (req, res) => {
 app.get("/api/topics", getTopics);
 
 app.get("/api/articles", getArticles);
-
-app.use(handle404Status);
-
-app.use(handle500Status);
 
 module.exports = app;
