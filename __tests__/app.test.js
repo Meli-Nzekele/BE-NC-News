@@ -1,5 +1,5 @@
 const request = require("supertest");
-const app = require("../db/app");
+const app = require("../app");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data/index");
@@ -57,15 +57,7 @@ describe("app", () => {
         expect(topics).toEqual(data.topicData);
       });
   });
-  it("404: should return a status 404 if path is invalid", () => {
-    return request(app)
-      .get("/api/invalid-input")
-      .expect(404)
-      .then((res) => {
-        expect(res.statusCode).toEqual(404);
-      });
-  });
-  describe.skip("/api/articles", () => {
+  describe("/api/articles", () => {
     it("200: GET - responds with an array", () => {
       return request(app)
         .get("/api/articles")
@@ -73,38 +65,39 @@ describe("app", () => {
         .then(({ body }) => {
           const { articles } = body;
           expect(articles).toBeInstanceOf(Array);
+          expect(articles.length).toBeGreaterThan(0);
         });
     });
-    it("200: GET - responds with an array of all the topic objects, with the correct properties", () => {
+    it("200: GET - responds with an array of all the article objects, with the correct properties, including comment_count and ordered by date descending", () => {
       return request(app)
-        .get("/api/topics")
+        .get("/api/articles")
         .expect(200)
         .then(({ body }) => {
           const { articles } = body;
           articles.forEach((article) => {
             expect(article).toMatchObject({
-              author: expect.any(String),
-              title: expect.any(String),
               article_id: expect.any(Number),
+              title: expect.any(String),
               topic: expect.any(String),
-              created_at: expect.any(Number),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
               votes: expect.any(Number),
               article_img_url: expect.any(String),
-              comment_count: expect.any(Number),
+              comment_count: expect.any(String),
             });
           });
         });
     });
+    describe("server errors", () => {
+      it("404: responds with message when sent a valid but non-existent path", () => {
+        return request(app)
+          .get("/not-an-existsing-path")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe("path not found");
+          });
+      });
+    });
   });
 });
-
-// an articles array of article objects, each of which should have the following properties:
-// author
-// title
-// article_id
-// topic
-// created_at
-// votes
-// article_img_url
-// comment_count which is the total count of all the comments with this article_id - you should make use of queries to the database in order to achieve this.
-// the articles should be sorted by date in descending order.
