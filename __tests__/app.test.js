@@ -57,4 +57,15 @@ describe("app", () => {
         expect(topics).toEqual(data.topicData);
       });
   });
+  describe("/api/", () => {
+    it("200: GET - responds with an array", () => {
+      return request(app)
+        .get("/api/topics")
+        .expect(200)
+        .then(({ body }) => {
+          const { topics } = body;
+          expect(topics).toBeInstanceOf(Array);
+        });
+    });
+  });
 });
