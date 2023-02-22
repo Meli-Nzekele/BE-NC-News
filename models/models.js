@@ -23,7 +23,7 @@ exports.fetchArticleById = (article_id) => {
     ])
     .then((result) => {
       if (result.rowCount === 0) {
-        return Promise.reject("article not found");
+        return Promise.reject("Article Not Found");
       }
       return result.rows;
     });
@@ -36,6 +36,9 @@ exports.fetchCommentsByArticleId = (article_id) => {
       [article_id]
     )
     .then((result) => {
+      if (result.rowCount === 0) {
+        return Promise.reject("Comment Not Found");
+      }
       return result.rows;
     });
 };
