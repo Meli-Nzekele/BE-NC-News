@@ -86,7 +86,7 @@ describe("app", () => {
         .expect(200)
         .then(({ body }) => {
           const { articles } = body;
-          expect(articles).toBeSorted("created_at");
+          expect(articles).toBeSorted("created_at", { descending: true });
         });
     });
   });
@@ -144,7 +144,7 @@ describe("app", () => {
         .expect(200)
         .then(({ body }) => {
           const { comments } = body;
-          expect(comments).toBeSorted("created_at");
+          expect(comments).toBeSorted("created_at", { descending: true });
         });
     });
   });
