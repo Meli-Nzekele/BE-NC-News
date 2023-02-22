@@ -28,3 +28,19 @@ exports.fetchArticleById = (article_id) => {
       return result.rows;
     });
 };
+
+exports.addComment = (article_id, newComment) => {
+  const { commentArticleId } = article_id;
+
+  const { body, author, id, votes = 0, created_at } = newComment;
+  console.log(newComment);
+
+  return db
+    .query(
+      `INSERT INTO comments (body, votes, author, article_id, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *;`,
+      [body, author, commentArticleId, votes, created_at]
+    )
+    .then((result) => {
+      return result.rows;
+    });
+};

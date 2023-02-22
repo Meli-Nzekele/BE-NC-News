@@ -114,6 +114,54 @@ describe("app", () => {
         });
     });
   });
+  describe.skip("/api/articles/:article_id/comments", () => {
+    it("201: responds with a single new comment object with the correct properties", () => {
+      const testNewComment = {
+        username: "butter_bridge",
+        body: "New Comment",
+      };
+
+      return request(app)
+        .post("/api/articles/4/comments")
+        .send(testNewComment)
+        .expect(201)
+        .then(({ body }) => {
+          const { comment } = body;
+          expect(comment.length).toBeGreaterThan(0);
+          expect(comment).toMatchObject({
+            comment_id: expect.any(Number),
+            body: expect.any(String),
+            votes: expect.any(Number),
+            author: expect.any(String),
+            article_id: expect.any(Number),
+            created_at: expect.any(String),
+          });
+        });
+    });
+    it("201: responds with the new correct comment added to comments", () => {
+      const testNewComment = {
+        username: "butter_bridge",
+        body: "New Comment",
+      };
+
+      return request(app)
+        .post("/api/articles/4/comments")
+        .send(testNewComment)
+        .expect(201)
+        .then(({ body }) => {
+          const { comment } = body;
+          expect(comment).toEqual({
+            comment_id: 19,
+            body: "New Comment",
+            votes: 0,
+            author: "butter_bridge",
+            article_id: 4,
+            created_at: expect.any(String),
+          });
+        });
+    });
+  });
+
   describe("server errors", () => {
     describe("404: /not-an-existing-path", () => {
       it("404: responds with message when sent a valid but non-existent path", () => {
@@ -142,6 +190,23 @@ describe("app", () => {
             expect(body.msg).toBe("Not Found");
           });
       });
+    });
+  });
+  describe.skip("/api/articles/:article_id/comments", () => {
+    it("404: responds with the correct message when sent an invalid user", () => {
+      const testNewComment = {
+        username: "Not-A-User",
+        body: "New Comment",
+      };
+
+      return request(app)
+        .post("/api/articles/4/comments")
+        .send(testNewComment)
+        .expect(404)
+        .then(({ body }) => {
+          const { comment } = body;
+          expect(comment).toBe("User Does Not Exist");
+        });
     });
   });
 });
