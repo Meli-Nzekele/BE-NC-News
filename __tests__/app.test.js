@@ -3,12 +3,15 @@ const app = require("../app");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data/index");
+
 afterAll(() => {
   db.end();
 });
+
 beforeEach(() => {
   return seed(data);
 });
+
 describe("app", () => {
   describe("/api", () => {
     it("200: GET - responds with server ok message", () => {
@@ -83,7 +86,7 @@ describe("app", () => {
         .expect(200)
         .then(({ body }) => {
           const { articles } = body;
-          expect(articles).toBeSorted("created_at");
+          expect(articles).toBeSorted("created_at", { descending: true });
         });
     });
   });
@@ -114,6 +117,37 @@ describe("app", () => {
         });
     });
   });
+  describe("/api/articles/:article_id/comments", () => {
+    it("200: GET - responds with an array of comments for the correct article", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          const { comments } = body;
+          expect(comments).toBeInstanceOf(Array);
+          expect(comments.length).toBeGreaterThan(0);
+          comments.forEach((comment) => {
+            expect(comment).toMatchObject({
+              comment_id: expect.any(Number),
+              body: expect.any(String),
+              votes: expect.any(Number),
+              author: expect.any(String),
+              article_id: expect.any(Number),
+              created_at: expect.any(String),
+            });
+          });
+        });
+    });
+    it("200: GET - responds with an array of comments for the correct article, ordered by date descending", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          const { comments } = body;
+          expect(comments).toBeSorted("created_at", { descending: true });
+        });
+    });
+  });
   describe("server errors", () => {
     describe("404: /not-an-existing-path", () => {
       it("404: responds with message when sent a valid but non-existent path", () => {
@@ -121,7 +155,7 @@ describe("app", () => {
           .get("/not-an-existing-path")
           .expect(404)
           .then(({ body }) => {
-            expect(body.msg).toBe("path not found");
+            expect(body.msg).toBe("Path Not Found");
           });
       });
     });
@@ -139,7 +173,33 @@ describe("app", () => {
           .get("/api/articles/1000")
           .expect(404)
           .then(({ body }) => {
-            expect(body.msg).toBe("Not Found");
+            expect(body.msg).toBe("Article Not Found");
+          });
+      });
+    });
+    describe("/api/articles/:article_id/comments", () => {
+      it("400: responds with message when sent a invalid parametric endpoint", () => {
+        return request(app)
+          .get("/api/articles/not-a-valid-article-id/comments")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Bad Request");
+          });
+      });
+      it("404: responds with correct message for valid but non-existent comments", () => {
+        return request(app)
+          .get("/api/articles/1234/comments")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Comment Not Found");
+          });
+      });
+      it("404: responds with message when sent a valid but non-existent path", () => {
+        return request(app)
+          .get("/api/articles/1/comets")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Path Not Found");
           });
       });
     });

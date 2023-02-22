@@ -23,7 +23,21 @@ exports.fetchArticleById = (article_id) => {
     ])
     .then((result) => {
       if (result.rowCount === 0) {
-        return Promise.reject("article not found");
+        return Promise.reject("Article Not Found");
+      }
+      return result.rows;
+    });
+};
+
+exports.fetchCommentsByArticleId = (article_id) => {
+  return db
+    .query(
+      `SELECT comments.* FROM comments WHERE comments.article_id = $1 ORDER BY created_at DESC;`,
+      [article_id]
+    )
+    .then((result) => {
+      if (result.rowCount === 0) {
+        return Promise.reject("Comment Not Found");
       }
       return result.rows;
     });
