@@ -204,6 +204,28 @@ describe("app", () => {
           });
         });
     });
+    it("201: responds with updated article object, when passed an object with additional key/value pairs", () => {
+      const testvote = { inc_votes: -100 };
+
+      return request(app)
+        .patch("/api/articles/1")
+        .send(testvote)
+        .expect(201)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toMatchObject({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 0,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+        });
+    });
   });
   describe("GET /api/articles/:article_id/comments", () => {
     it("200: GET - responds with an array of comments for the correct article", () => {
