@@ -4,6 +4,7 @@ const {
   getArticles,
   getArticleById,
   getCommentsByArticleId,
+  postComment,
 } = require("./controllers/controllers");
 
 const {
@@ -12,6 +13,8 @@ const {
   handleCustomErrors,
 } = require("./controllers/errorHandlingControllers");
 const app = express();
+
+app.use(express.json());
 
 app.get("/api", (request, response) => {
   response.status(200).send({ message: "server ok" });
@@ -24,6 +27,8 @@ app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
+
+app.post("/api/articles/:article_id/comments", postComment);
 
 app.use(handle404Status);
 

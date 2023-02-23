@@ -5,6 +5,8 @@ exports.handle404Status = (request, response) => {
 exports.handlePSQL400Status = (error, request, response, next) => {
   if (error.code === "22P02") {
     response.status(400).send({ msg: "Bad Request" });
+  } else if (error === "Invalid Comment Format") {
+    response.status(400).send({ msg: "Invalid Comment Format" });
   } else {
     next(error);
   }
@@ -13,9 +15,14 @@ exports.handlePSQL400Status = (error, request, response, next) => {
 exports.handleCustomErrors = (error, request, response, next) => {
   if (error === "Article Not Found") {
     response.status(404).send({ msg: "Article Not Found" });
+  } else if (error.code === "23503") {
+    response.status(404).send({ msg: "Article ID Does Not Exist" });
   } else if (error === "Comment Not Found") {
     response.status(404).send({ msg: "Comment Not Found" });
+  } else if (error === "Author Not Found") {
+    response.status(404).send({ msg: "Author Not Found" });
   } else {
-    next(error);
+    console.log(error);
+    response.status(500).send({ msg: "Internal Server Error" });
   }
 };
