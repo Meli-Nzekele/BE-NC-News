@@ -265,8 +265,6 @@ describe("app", () => {
               expect(body.msg).toBe("Author Not Found");
             });
         });
-      });
-      describe("status: 400", () => {
         it("404: responds with correct message for valid but non-existent article_id", () => {
           const testNewComment = {
             username: "butter_bridge",
@@ -276,11 +274,13 @@ describe("app", () => {
           return request(app)
             .post("/api/articles/4321/comments")
             .send(testNewComment)
-            .expect(400)
+            .expect(404)
             .then(({ body }) => {
-              expect(body.msg).toBe("Article Does Not Exist");
+              expect(body.msg).toBe("Article ID Does Not Exist");
             });
         });
+      });
+      describe("status: 400", () => {
         it("400: responds with correct message when sent a invalid parametric endpoint", () => {
           const testNewComment = {
             username: "butter_bridge",
