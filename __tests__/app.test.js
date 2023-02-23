@@ -128,7 +128,6 @@ describe("app", () => {
         .expect(200)
         .then(({ body }) => {
           const { article } = body;
-          console.log(article, "a1");
           expect(article).toMatchObject({
             article_id: 1,
             title: "Living in the shadow of a great man",
@@ -151,7 +150,6 @@ describe("app", () => {
         .expect(200)
         .then(({ body }) => {
           const { article } = body;
-          console.log(article, "a2");
 
           expect(article).toMatchObject({
             article_id: 1,
@@ -263,6 +261,26 @@ describe("app", () => {
             author: "butter_bridge",
             article_id: 4,
             created_at: expect.any(String),
+          });
+        });
+    });
+  });
+  describe("GET /api/users", () => {
+    it("200: responds with an array of user objects", () => {
+      return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then(({ body }) => {
+          const { users } = body;
+          expect(users).toBeInstanceOf(Array);
+          expect(users.length).toBeGreaterThan(0);
+
+          users.forEach((user) => {
+            expect(user).toMatchObject({
+              username: expect.any(String),
+              name: expect.any(String),
+              avatar_url: expect.any(String),
+            });
           });
         });
     });
