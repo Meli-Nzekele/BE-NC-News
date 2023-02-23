@@ -1,4 +1,5 @@
 const request = require("supertest");
+const sorted = require("jest-sorted");
 const app = require("../app");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
@@ -13,7 +14,7 @@ beforeEach(() => {
 });
 
 describe("app", () => {
-  describe("/api", () => {
+  describe("GET /api", () => {
     it("200: GET - responds with server ok message", () => {
       return request(app)
         .get("/api")
@@ -23,7 +24,7 @@ describe("app", () => {
         });
     });
   });
-  describe("/api/topics", () => {
+  describe("GET /api/topics", () => {
     it("200: GET - responds with an array", () => {
       return request(app)
         .get("/api/topics")
@@ -48,7 +49,7 @@ describe("app", () => {
         });
     });
   });
-  describe("/api/articles", () => {
+  describe("GET /api/articles", () => {
     it("200: GET - responds with an array", () => {
       return request(app)
         .get("/api/articles")
@@ -90,7 +91,7 @@ describe("app", () => {
         });
     });
   });
-  describe("/api/articles/:article_id", () => {
+  describe("GET /api/articles/:article_id", () => {
     it("200: GET - responds with the requested article data", () => {
       const testArticle = [
         {
@@ -114,6 +115,93 @@ describe("app", () => {
           expect(article).toBeInstanceOf(Array);
           expect(article.length).toBeGreaterThan(0);
           expect(article).toEqual(testArticle);
+        });
+    });
+  });
+  describe("PATCH /api/articles/:article_id", () => {
+    it("201: responds with updated article object, with correct properties", () => {
+      const testvote = { inc_votes: 1 };
+
+      return request(app)
+        .patch("/api/articles/1")
+        .send(testvote)
+        .expect(201)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toMatchObject({
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+          });
+        });
+    });
+    it("201: responds with updated article object, when article already votes", () => {
+      const testvote = { inc_votes: 1 };
+
+      return request(app)
+        .patch("/api/articles/1")
+        .send(testvote)
+        .expect(201)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toMatchObject({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 101,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+        });
+    });
+    it("201: responds with updated article object, when article orginally has 0 votes", () => {
+      const testvote = { inc_votes: 8 };
+
+      return request(app)
+        .patch("/api/articles/8")
+        .send(testvote)
+        .expect(201)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toMatchObject({
+            title: "Does Mitch predate civilisation?",
+            topic: "mitch",
+            author: "icellusedkars",
+            body: "Archaeologists have uncovered a gigantic statue from the dawn of humanity, and it has an uncanny resemblance to Mitch. Surely I am not the only person who can see this?!",
+            created_at: expect.any(String),
+            votes: 8,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+        });
+    });
+    it("201: responds with updated article object, when passed an object with additional key/value pairs", () => {
+      const testvote = { inc_votes: 8, key: "value" };
+
+      return request(app)
+        .patch("/api/articles/8")
+        .send(testvote)
+        .expect(201)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toMatchObject({
+            title: "Does Mitch predate civilisation?",
+            topic: "mitch",
+            author: "icellusedkars",
+            body: "Archaeologists have uncovered a gigantic statue from the dawn of humanity, and it has an uncanny resemblance to Mitch. Surely I am not the only person who can see this?!",
+            created_at: expect.any(String),
+            votes: 8,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
         });
     });
   });
@@ -244,6 +332,57 @@ describe("app", () => {
           .then(({ body }) => {
             expect(body.msg).toBe("Article Not Found");
           });
+      });
+    });
+    describe("PATCH /api/articles/:article_id", () => {
+      describe("status: 404", () => {
+        it("404: responds with correct message when sent a invalid parametric endpoint", () => {
+          const testVotePatch = { inc_votes: 1 };
+
+          return request(app)
+            .patch("/api/articles/1000")
+            .send(testVotePatch)
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Not Found");
+            });
+        });
+        describe("status: 400", () => {
+          it("400: responds with correct message when sent a invalid parametric endpoint", () => {
+            const testVotePatch = { inc_votes: 1 };
+
+            return request(app)
+              .patch("/api/articles/four")
+              .send(testVotePatch)
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+              });
+          });
+          it("400: responds with correct message when passed an empty object", () => {
+            const testVotePatch = {};
+
+            return request(app)
+              .patch("/api/articles/1")
+              .send(testVotePatch)
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+              });
+          });
+
+          it("400: responds with correct message when passed an object with the wrong data type", () => {
+            const testVotePatch = { inc_votes: "six" };
+
+            return request(app)
+              .patch("/api/articles/1")
+              .send(testVotePatch)
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+              });
+          });
+        });
       });
     });
     describe("GET /api/articles/:article_id/comments", () => {
