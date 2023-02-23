@@ -62,3 +62,20 @@ exports.addComment = (article_id, newComment) => {
       return result.rows[0];
     });
 };
+
+exports.updateVotes = (article_id, votes) => {
+  if (!votes.inc_votes === undefined || Object.keys(votes).length === 0) {
+    return Promise.reject("Bad Request");
+  }
+  return db
+    .query(
+      `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *;`,
+      [votes.inc_votes, article_id]
+    )
+    .then((result) => {
+      if (result.rowCount === 0) {
+        return Promise.reject("Not Found");
+      }
+      return result.rows[0];
+    });
+};
