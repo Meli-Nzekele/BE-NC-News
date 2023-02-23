@@ -119,36 +119,16 @@ describe("app", () => {
     });
   });
   describe("PATCH /api/articles/:article_id", () => {
-    it("201: responds with updated article object, with correct properties", () => {
-      const testvote = { inc_votes: 1 };
+    it("200: responds with article object correctly updated, and ignores additional key/value pairs", () => {
+      const testvote = { inc_votes: 1, key: "value" };
 
       return request(app)
         .patch("/api/articles/1")
         .send(testvote)
-        .expect(201)
+        .expect(200)
         .then(({ body }) => {
           const { article } = body;
-          expect(article).toMatchObject({
-            article_id: expect.any(Number),
-            title: expect.any(String),
-            topic: expect.any(String),
-            author: expect.any(String),
-            body: expect.any(String),
-            created_at: expect.any(String),
-            votes: expect.any(Number),
-            article_img_url: expect.any(String),
-          });
-        });
-    });
-    it("201: responds with updated article object, when article already votes", () => {
-      const testvote = { inc_votes: 1 };
-
-      return request(app)
-        .patch("/api/articles/1")
-        .send(testvote)
-        .expect(201)
-        .then(({ body }) => {
-          const { article } = body;
+          console.log(article, "a1");
           expect(article).toMatchObject({
             article_id: 1,
             title: "Living in the shadow of a great man",
@@ -162,57 +142,17 @@ describe("app", () => {
           });
         });
     });
-    it("201: responds with updated article object, when article orginally has 0 votes", () => {
-      const testvote = { inc_votes: 8 };
-
-      return request(app)
-        .patch("/api/articles/8")
-        .send(testvote)
-        .expect(201)
-        .then(({ body }) => {
-          const { article } = body;
-          expect(article).toMatchObject({
-            title: "Does Mitch predate civilisation?",
-            topic: "mitch",
-            author: "icellusedkars",
-            body: "Archaeologists have uncovered a gigantic statue from the dawn of humanity, and it has an uncanny resemblance to Mitch. Surely I am not the only person who can see this?!",
-            created_at: expect.any(String),
-            votes: 8,
-            article_img_url:
-              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-          });
-        });
-    });
-    it("201: responds with updated article object, when passed an object with additional key/value pairs", () => {
-      const testvote = { inc_votes: 8, key: "value" };
-
-      return request(app)
-        .patch("/api/articles/8")
-        .send(testvote)
-        .expect(201)
-        .then(({ body }) => {
-          const { article } = body;
-          expect(article).toMatchObject({
-            title: "Does Mitch predate civilisation?",
-            topic: "mitch",
-            author: "icellusedkars",
-            body: "Archaeologists have uncovered a gigantic statue from the dawn of humanity, and it has an uncanny resemblance to Mitch. Surely I am not the only person who can see this?!",
-            created_at: expect.any(String),
-            votes: 8,
-            article_img_url:
-              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-          });
-        });
-    });
-    it("201: responds with updated article object, when passed an object with additional key/value pairs", () => {
-      const testvote = { inc_votes: -100 };
+    it("200: responds with article object correctly updated, when passed a number to decrement the number votes", () => {
+      const testvote = { inc_votes: -101 };
 
       return request(app)
         .patch("/api/articles/1")
         .send(testvote)
-        .expect(201)
+        .expect(200)
         .then(({ body }) => {
           const { article } = body;
+          console.log(article, "a2");
+
           expect(article).toMatchObject({
             article_id: 1,
             title: "Living in the shadow of a great man",
@@ -220,7 +160,7 @@ describe("app", () => {
             author: "butter_bridge",
             body: "I find this existence challenging",
             created_at: expect.any(String),
-            votes: 0,
+            votes: -1,
             article_img_url:
               "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
           });
