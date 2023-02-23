@@ -148,7 +148,7 @@ describe("app", () => {
         });
     });
   });
-  describe.skip("POST /api/articles/:article_id/comments", () => {
+  describe("POST /api/articles/:article_id/comments", () => {
     it("201: responds with a single new comment object with the correct properties", () => {
       const testNewComment = {
         username: "butter_bridge",
@@ -161,7 +161,6 @@ describe("app", () => {
         .expect(201)
         .then(({ body }) => {
           const { comment } = body;
-          expect(comment.length).toBeGreaterThan(0);
           expect(comment).toMatchObject({
             comment_id: expect.any(Number),
             body: expect.any(String),
@@ -196,7 +195,7 @@ describe("app", () => {
     });
   });
   describe("server errors", () => {
-    describe("404: GET /not-an-existing-path", () => {
+    describe("GET /not-an-existing-path", () => {
       it("404: responds with message when sent a valid but non-existent path", () => {
         return request(app)
           .get("/not-an-existing-path")
@@ -225,7 +224,7 @@ describe("app", () => {
       });
     });
     describe("GET /api/articles/:article_id/comments", () => {
-      it("400: responds with message when sent a invalid parametric endpoint", () => {
+      it("400: responds with correct message when sent a invalid parametric endpoint", () => {
         return request(app)
           .get("/api/articles/not-a-valid-article-id/comments")
           .expect(400)
@@ -241,7 +240,7 @@ describe("app", () => {
             expect(body.msg).toBe("Comment Not Found");
           });
       });
-      it("404: responds with message when sent a valid but non-existent path", () => {
+      it("404: responds with correct message when sent a valid but non-existent path", () => {
         return request(app)
           .get("/api/articles/1/comets")
           .expect(404)
@@ -250,21 +249,66 @@ describe("app", () => {
           });
       });
     });
-    describe.skip("POST /api/articles/:article_id/comments", () => {
-      it("404: responds with the correct message when sent an invalid user", () => {
-        const testNewComment = {
-          username: "Not-A-User",
-          body: "New Comment",
-        };
+    describe("POST /api/articles/:article_id/comments", () => {
+      describe("status: 404", () => {
+        it("404: responds with correct message when sent an invalid user", () => {
+          const testNewComment = {
+            username: "",
+            body: "New Comment",
+          };
 
-        return request(app)
-          .post("/api/articles/4/comments")
-          .send(testNewComment)
-          .expect(404)
-          .then(({ body }) => {
-            const { comment } = body;
-            expect(comment).toBe("User Does Not Exist");
-          });
+          return request(app)
+            .post("/api/articles/4/comments")
+            .send(testNewComment)
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Author Not Found");
+            });
+        });
+      });
+      describe("status: 400", () => {
+        it("404: responds with correct message for valid but non-existent article_id", () => {
+          const testNewComment = {
+            username: "butter_bridge",
+            body: "New Comment",
+          };
+
+          return request(app)
+            .post("/api/articles/4321/comments")
+            .send(testNewComment)
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Article Does Not Exist");
+            });
+        });
+        it("400: responds with correct message when sent a invalid parametric endpoint", () => {
+          const testNewComment = {
+            username: "butter_bridge",
+            body: "New Comment",
+          };
+
+          return request(app)
+            .post("/api/articles/four/comments")
+            .send(testNewComment)
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Bad Request");
+            });
+        });
+        it("400: responds with correct message when sent an object without a comment", () => {
+          const testNewComment = {
+            username: "butter_bridge",
+            body: "",
+          };
+
+          return request(app)
+            .post("/api/articles/4/comments")
+            .send(testNewComment)
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Invalid Comment Format");
+            });
+        });
       });
     });
   });
