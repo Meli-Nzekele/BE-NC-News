@@ -193,6 +193,29 @@ describe("app", () => {
           });
         });
     });
+    it("201: responds with the new correct comment added to comments and ignores any invalid properties", () => {
+      const testNewComment = {
+        username: "butter_bridge",
+        body: "New Comment",
+        location: "Unknown",
+      };
+
+      return request(app)
+        .post("/api/articles/4/comments")
+        .send(testNewComment)
+        .expect(201)
+        .then(({ body }) => {
+          const { comment } = body;
+          expect(comment).toEqual({
+            comment_id: 19,
+            body: "New Comment",
+            votes: 0,
+            author: "butter_bridge",
+            article_id: 4,
+            created_at: expect.any(String),
+          });
+        });
+    });
   });
   describe("server errors", () => {
     describe("GET /not-an-existing-path", () => {
