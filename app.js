@@ -14,6 +14,8 @@ const {
 } = require("./controllers/errorHandlingControllers");
 const app = express();
 
+app.use(express.json());
+
 app.get("/api", (request, response) => {
   response.status(200).send({ message: "server ok" });
 });

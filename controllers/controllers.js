@@ -6,20 +6,20 @@ const {
   addComment,
 } = require("../models/models");
 
-exports.getTopics = (req, res, next) => {
+exports.getTopics = (request, response, next) => {
   fetchTopics()
     .then((topics) => {
-      res.status(200).send({ topics });
+      response.status(200).send({ topics });
     })
     .catch((error) => {
       next(error);
     });
 };
 
-exports.getArticles = (req, res, next) => {
+exports.getArticles = (request, response, next) => {
   fetchArticles()
     .then((articles) => {
-      res.status(200).send({ articles });
+      response.status(200).send({ articles });
     })
     .catch((error) => {
       next(error);
@@ -52,10 +52,11 @@ exports.getCommentsByArticleId = (request, response, next) => {
 exports.postComment = (request, response, next) => {
   const { article_id } = request.params;
   const newComment = request.body;
-
   addComment(article_id, newComment)
     .then((comment) => {
       response.status(201).send({ comment });
     })
-    .catch((error) => next(error));
+    .catch((error) => {
+      next(error);
+    });
 };

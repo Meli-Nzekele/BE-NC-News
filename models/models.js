@@ -44,17 +44,21 @@ exports.fetchCommentsByArticleId = (article_id) => {
 };
 
 exports.addComment = (article_id, newComment) => {
-  const { commentArticleId } = article_id;
+  const { body, username } = newComment;
 
-  const { body, author, id, votes = 0, created_at } = newComment;
-  console.log(newComment);
+  if (body.length === 0) {
+    return Promise.reject("Invalid Comment Format");
+  }
+  if (username.length === 0) {
+    return Promise.reject("Author Not Found");
+  }
 
   return db
     .query(
-      `INSERT INTO comments (body, votes, author, article_id, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *;`,
-      [body, author, commentArticleId, votes, created_at]
+      `INSERT INTO comments (body, author, article_id) VALUES ($1, $2, $3) RETURNING *;`,
+      [body, username, article_id]
     )
     .then((result) => {
-      return result.rows;
+      return result.rows[0];
     });
 };
