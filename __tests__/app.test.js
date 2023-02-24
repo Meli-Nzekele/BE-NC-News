@@ -1,5 +1,4 @@
 const request = require("supertest");
-const sorted = require("jest-sorted");
 const app = require("../app");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
@@ -76,7 +75,7 @@ describe("app", () => {
               created_at: expect.any(String),
               votes: expect.any(Number),
               article_img_url: expect.any(String),
-              comment_count: expect.any(String),
+              comment_count: expect.any(Number),
             });
           });
         });
@@ -88,6 +87,71 @@ describe("app", () => {
         .then(({ body }) => {
           const { articles } = body;
           expect(articles).toBeSorted("created_at", { descending: true });
+        });
+    });
+  });
+  describe("GET /api/articles?queries", () => {
+    it("200: GET - responds with correct topic articles", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeInstanceOf(Array);
+          expect(articles.length).toBeGreaterThan(0);
+
+          articles.forEach((article) => {
+            expect(article).toMatchObject({
+              article_id: expect.any(Number),
+              title: expect.any(String),
+              topic: "mitch",
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(Number),
+            });
+          });
+          expect(articles).toBeSortedBy("created_at", {
+            descending: true,
+          });
+        });
+    });
+    it("200: GET - responds with a valid column sorted, descending by default", () => {
+      return request(app)
+        .get("/api/articles?sort_by=votes")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeSorted("votes", { descending: true });
+        });
+    });
+    it("200: GET - responds with a valid column sorted in ascending order", () => {
+      return request(app)
+        .get("/api/articles?sort_by=author&order=asc")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeSorted("author", { ascending: true });
+        });
+    });
+    it("200: GET - responds with correct articles with more than one query", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch&sort_by=author&order=asc")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeSorted("author", { ascending: true });
+        });
+    });
+    it("200: responds with correct message when passed topic with no related articles", () => {
+      return request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBe("Article Not Found");
         });
     });
   });
@@ -296,8 +360,38 @@ describe("app", () => {
           });
       });
     });
-    describe("GET /api/articles/:articles", () => {
-      it("400: responds with message when sent a invalid parametric endpoint", () => {
+    describe("GET /api/articles?queries", () => {
+      describe("status: 404", () => {
+        it("404: responds with correct message when passed a invalid topic", () => {
+          return request(app)
+            .get("/api/articles?topic=not-a-topic")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Topic Not found");
+            });
+        });
+      });
+      describe("status: 400", () => {
+        it("400: responds with correct message when passed a invalid column", () => {
+          return request(app)
+            .get("/api/articles?sort_by=not-a-valid-column")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Bad Request");
+            });
+        });
+        it("400: responds with correct message when passed a invalid order", () => {
+          return request(app)
+            .get("/api/articles?order_by=not-a-valid-order")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Bad Request");
+            });
+        });
+      });
+    });
+    describe("GET /api/articles/:article_id", () => {
+      it("400: respondswith correct message when sent a invalid parametric endpoint", () => {
         return request(app)
           .get("/api/articles/not-a-valid-article-id")
           .expect(400)

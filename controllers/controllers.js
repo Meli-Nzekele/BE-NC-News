@@ -1,5 +1,6 @@
 const {
   fetchTopics,
+  fetchTopicByName,
   fetchArticles,
   fetchArticleById,
   updateVotes,
@@ -19,8 +20,16 @@ exports.getTopics = (request, response, next) => {
 };
 
 exports.getArticles = (request, response, next) => {
-  fetchArticles()
-    .then((articles) => {
+  const { topic, sort_by, order_by } = request.query;
+
+  const articlesPromises = [fetchArticles(topic, sort_by, order_by)];
+
+  if (topic) {
+    articlesPromises.push(fetchTopicByName(topic));
+  }
+
+  Promise.all(articlesPromises)
+    .then(([articles]) => {
       response.status(200).send({ articles });
     })
     .catch((error) => {

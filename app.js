@@ -12,7 +12,8 @@ const {
 const {
   handle404Status,
   handlePSQL400Status,
-  handleCustomErrors,
+  handleCustom400Errors,
+  handleCustom404Errors,
 } = require("./controllers/errorHandlingControllers");
 const app = express();
 
@@ -40,6 +41,8 @@ app.use(handle404Status);
 
 app.use(handlePSQL400Status);
 
-app.use(handleCustomErrors);
+app.use(handleCustom400Errors);
+
+app.use(handleCustom404Errors);
 
 module.exports = app;
