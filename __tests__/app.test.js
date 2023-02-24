@@ -155,35 +155,7 @@ describe("app", () => {
         });
     });
   });
-  describe.skip("GET /api/articles/:article_id", () => {
-    it("200: GET - responds with the requested article data", () => {
-      const testArticle = [
-        {
-          article_id: 3,
-          title: "Eight pug gifs that remind me of mitch",
-          topic: "mitch",
-          author: "icellusedkars",
-          body: "some gifs",
-          created_at: "2020-11-03T09:12:00.000Z",
-          votes: 0,
-          article_img_url:
-            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-        },
-      ];
-
-      return request(app)
-        .get("/api/articles/3")
-        .expect(200)
-        .then(({ body }) => {
-          const { article } = body;
-          console.log(article);
-          expect(article).toBeInstanceOf(Array);
-          expect(article.length).toBeGreaterThan(0);
-          expect(article).toEqual(testArticle);
-        });
-    });
-  });
-  describe("GET /api/articles/:article_id (comment_count)", () => {
+  describe("GET /api/articles/:article_id", () => {
     it("200: responds with article including the comment_count", () => {
       return request(app)
         .get("/api/articles/1")
