@@ -2,18 +2,67 @@ const db = require("../db/connection");
 
 exports.fetchTopics = () => {
   return db.query(`SELECT * FROM topics;`).then((result) => {
+    if (result.rowCount === 0) {
+      return Promise.reject("Topic Not Found");
+    }
     return result.rows;
   });
 };
 
-exports.fetchArticles = () => {
+exports.fetchTopicByName = (topic) => {
   return db
-    .query(
-      `SELECT articles.*, COUNT(comments.article_id) AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id GROUP BY articles.article_id ORDER BY created_at DESC;`
-    )
+    .query(`SELECT * FROM topics WHERE slug = $1`, [topic])
     .then((result) => {
-      return result.rows;
+      if (result.rows.length === 0) {
+        return Promise.reject("Topic Not found");
+      }
+      return result.rows[0];
     });
+};
+
+exports.fetchArticles = (topic, sort_by = "created_at", order_by = "DESC") => {
+  const validSortByOptions = [
+    "title",
+    "topic",
+    "author",
+    "body",
+    "created_at",
+    "article_id",
+    "votes",
+    "comment_count",
+  ];
+
+  const validOrderByOptions = ["ASC", "DESC", "asc", "desc"];
+
+  if (
+    !validSortByOptions.includes(sort_by) ||
+    !validOrderByOptions.includes(order_by)
+  ) {
+    return Promise.reject("Bad Request");
+  }
+
+  let queryString = `SELECT articles.*, COUNT(comments.comment_id) :: INT AS comment_count
+  FROM articles 
+  LEFT JOIN comments 
+  ON articles.article_id = comments.article_id`;
+
+  const queryParams = [];
+
+  if (topic) {
+    queryString += ` WHERE articles.topic = $1`;
+    queryParams.push(topic);
+  }
+
+  queryString += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order_by}`;
+
+  return db.query(queryString, queryParams).then((result) => {
+    if (result.rows === undefined) {
+      return Promise.reject("Not Found");
+    } else if (result.rows.length === 0) {
+      return "Article Not Found";
+    }
+    return result.rows;
+  });
 };
 
 exports.fetchArticleById = (article_id) => {
@@ -82,6 +131,9 @@ exports.updateVotes = (article_id, votes) => {
 
 exports.fetchUsers = () => {
   return db.query(`SELECT users.* FROM users;`).then((result) => {
+    if (result.rowCount === 0) {
+      return Promise.reject("Not Found");
+    }
     return result.rows;
   });
 };
