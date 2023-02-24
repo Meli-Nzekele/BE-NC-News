@@ -156,29 +156,24 @@ describe("app", () => {
     });
   });
   describe("GET /api/articles/:article_id", () => {
-    it("200: GET - responds with the requested article data", () => {
-      const testArticle = [
-        {
-          article_id: 3,
-          title: "Eight pug gifs that remind me of mitch",
-          topic: "mitch",
-          author: "icellusedkars",
-          body: "some gifs",
-          created_at: "2020-11-03T09:12:00.000Z",
-          votes: 0,
-          article_img_url:
-            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-        },
-      ];
-
+    it("200: responds with article including the comment_count", () => {
       return request(app)
-        .get("/api/articles/3")
+        .get("/api/articles/1")
         .expect(200)
         .then(({ body }) => {
           const { article } = body;
-          expect(article).toBeInstanceOf(Array);
-          expect(article.length).toBeGreaterThan(0);
-          expect(article).toEqual(testArticle);
+          expect(article).toMatchObject({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 100,
+            comment_count: 11,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
         });
     });
   });
