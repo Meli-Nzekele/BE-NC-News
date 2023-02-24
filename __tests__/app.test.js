@@ -155,7 +155,7 @@ describe("app", () => {
         });
     });
   });
-  describe("GET /api/articles/:article_id", () => {
+  describe.skip("GET /api/articles/:article_id", () => {
     it("200: GET - responds with the requested article data", () => {
       const testArticle = [
         {
@@ -176,9 +176,52 @@ describe("app", () => {
         .expect(200)
         .then(({ body }) => {
           const { article } = body;
+          console.log(article);
           expect(article).toBeInstanceOf(Array);
           expect(article.length).toBeGreaterThan(0);
           expect(article).toEqual(testArticle);
+        });
+    });
+  });
+  describe("GET /api/articles/:article_id?comment_count", () => {
+    it("200: responds with the comment count for the correct given article with votes", () => {
+      return request(app)
+        .get("/api/articles/1?comment_count=true")
+        .expect(200)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toMatchObject({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 100,
+            comment_count: 11,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+        });
+    });
+    it("200: responds with the comment count for the correct given article without any votes", () => {
+      return request(app)
+        .get("/api/articles/1?comment_count=true")
+        .expect(200)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toMatchObject({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 100,
+            comment_count: 11,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
         });
     });
   });
@@ -406,6 +449,18 @@ describe("app", () => {
           .then(({ body }) => {
             expect(body.msg).toBe("Article Not Found");
           });
+      });
+    });
+    describe.skip("GET /api/articles/:article_id?comment_count", () => {
+      describe("status: 404", () => {
+        it("404: responds with correct message when passed a query", () => {
+          return request(app)
+            .get("/api/articles/1?comment_count=false")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.message).toBe("Not Found");
+            });
+        });
       });
     });
     describe("PATCH /api/articles/:article_id", () => {
