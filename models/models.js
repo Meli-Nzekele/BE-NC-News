@@ -144,6 +144,17 @@ exports.fetchUsers = () => {
   });
 };
 
+exports.fetchUsersByUsername = (username) => {
+  return db
+    .query(`SELECT * FROM USERS WHERE username = $1;`, [username])
+    .then((result) => {
+      if (result.rowCount === 0) {
+        return Promise.reject("Not Found");
+      }
+      return result.rows[0];
+    });
+};
+
 exports.removeCommentById = (comment_id) => {
   return db
     .query("DELETE FROM comments WHERE comment_id = $1 RETURNING *;", [
