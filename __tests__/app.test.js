@@ -344,6 +344,22 @@ describe("app", () => {
         });
     });
   });
+  describe("GET /api/users/:username", () => {
+    it("200: responds with the correct user", () => {
+      return request(app)
+        .get("/api/users/lurker")
+        .expect(200)
+        .then(({ body }) => {
+          const { user } = body;
+          expect(user).toMatchObject({
+            username: "lurker",
+            name: "do_nothing",
+            avatar_url:
+              "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          });
+        });
+    });
+  });
   describe("DELETE /api/comments/:comment_id", () => {
     it("204: Deletes the correct comment when passed a comment id", () => {
       return request(app)
@@ -550,6 +566,16 @@ describe("app", () => {
               expect(body.msg).toBe("Invalid Comment Format");
             });
         });
+      });
+    });
+    describe("GET /api/users/:username", () => {
+      it("404: responds with message when sent a user that does not exist", () => {
+        return request(app)
+          .get("/api/users/not-a-user")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Not Found");
+          });
       });
     });
     describe("DELETE /api/comments/:comment_id", () => {

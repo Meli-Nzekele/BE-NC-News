@@ -1,4 +1,6 @@
 const express = require("express");
+const app = express();
+
 const {
   getTopics,
   getArticles,
@@ -7,6 +9,7 @@ const {
   getCommentsByArticleId,
   postComment,
   getUsers,
+  getUsersByUsername,
   deleteCommentById,
 } = require("./controllers/controllers");
 
@@ -16,7 +19,6 @@ const {
   handleCustom400Errors,
   handleCustom404Errors,
 } = require("./controllers/errorHandlingControllers");
-const app = express();
 
 app.use(express.json());
 
@@ -36,9 +38,11 @@ app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
 app.post("/api/articles/:article_id/comments", postComment);
 
-app.delete("/api/comments/:comment_id", deleteCommentById);
-
 app.get("/api/users", getUsers);
+
+app.get("/api/users/:username", getUsersByUsername);
+
+app.delete("/api/comments/:comment_id", deleteCommentById);
 
 app.use(handle404Status);
 
