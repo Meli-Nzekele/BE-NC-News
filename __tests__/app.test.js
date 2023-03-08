@@ -344,6 +344,16 @@ describe("app", () => {
         });
     });
   });
+  describe("DELETE /api/comments/:comment_id", () => {
+    it("204: Deletes the correct comment when passed a comment id", () => {
+      return request(app)
+        .delete("/api/comments/11")
+        .expect(204)
+        .then(({ body }) => {
+          expect(body).toEqual({});
+        });
+    });
+  });
   describe("server errors", () => {
     describe("GET /not-an-existing-path", () => {
       it("404: responds with message when sent a valid but non-existent path", () => {
@@ -538,6 +548,26 @@ describe("app", () => {
             .expect(400)
             .then(({ body }) => {
               expect(body.msg).toBe("Invalid Comment Format");
+            });
+        });
+      });
+    });
+    describe("DELETE /api/comments/:comment_id", () => {
+      test("400: respond with error if comment_id is not a number", () => {
+        return request(app)
+          .delete("/api/comments/four")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Bad Request");
+          });
+      });
+      describe("status: 404", () => {
+        it("404: responds with correct error message when passed a valid but non-existent comment id", () => {
+          return request(app)
+            .delete("/api/comment/1000")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Path Not Found");
             });
         });
       });
