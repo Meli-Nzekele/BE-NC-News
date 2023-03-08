@@ -8,6 +8,7 @@ const {
   addComment,
   fetchUsers,
   fetchUsersByUsername,
+  updateCommentVotes,
   removeCommentById,
 } = require("../models/models");
 
@@ -102,6 +103,18 @@ exports.getUsersByUsername = (request, response, next) => {
   fetchUsersByUsername(username)
     .then((user) => {
       response.status(200).send({ user });
+    })
+    .catch((error) => {
+      next(error);
+    });
+};
+
+exports.patchCommentById = (request, response, next) => {
+  const { comment_id } = request.params;
+  const votes = request.body;
+  updateCommentVotes(comment_id, votes)
+    .then((comment) => {
+      response.status(200).send({ comment });
     })
     .catch((error) => {
       next(error);
