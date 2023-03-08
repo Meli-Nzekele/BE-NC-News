@@ -119,7 +119,7 @@ exports.addComment = (article_id, newComment) => {
 };
 
 exports.updateVotes = (article_id, votes) => {
-  if (!votes.inc_votes === undefined || Object.keys(votes).length === 0) {
+  if (votes.inc_votes === undefined || Object.keys(votes).length === 0) {
     return Promise.reject("Bad Request");
   }
   return db
@@ -147,6 +147,27 @@ exports.fetchUsers = () => {
 exports.fetchUsersByUsername = (username) => {
   return db
     .query(`SELECT * FROM USERS WHERE username = $1;`, [username])
+    .then((result) => {
+      if (result.rowCount === 0) {
+        return Promise.reject("Not Found");
+      }
+      return result.rows[0];
+    });
+};
+
+exports.updateCommentVotes = (comment_id, votes) => {
+  if (
+    !votes ||
+    votes.inc_votes === undefined ||
+    Object.keys(votes).length === 0
+  ) {
+    return Promise.reject("Bad Request");
+  }
+  return db
+    .query(
+      `UPDATE comments SET votes = votes + $1 WHERE comment_id = $2 RETURNING *;`,
+      [votes.inc_votes, comment_id]
+    )
     .then((result) => {
       if (result.rowCount === 0) {
         return Promise.reject("Not Found");

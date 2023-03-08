@@ -360,6 +360,43 @@ describe("app", () => {
         });
     });
   });
+  describe("PATCH /api/comments/:comment_id", () => {
+    it("200: responds with the comment votes correctly incremented", () => {
+      const testvote = { inc_votes: 1 };
+
+      return request(app)
+        .patch("/api/comments/1")
+        .send(testvote)
+        .expect(200)
+        .then(({ body }) => {
+          const { comment } = body;
+          expect(comment.votes).toBe(17);
+        });
+    });
+    it("200: Number of comment votes stay the same when an inc_votes property is not given", () => {
+      const testvote = { inc_votes: 0 };
+      return request(app)
+        .patch("/api/comments/2")
+        .send(testvote)
+        .expect(200)
+        .then(({ body }) => {
+          const { comment } = body;
+          expect(comment.votes).toBe(14);
+        });
+    });
+    it("200: Number of comment votes stay the same when an inc_votes property is not given", () => {
+      const testvote = { inc_votes: -10 };
+
+      return request(app)
+        .patch("/api/comments/3")
+        .send(testvote)
+        .expect(200)
+        .then(({ body }) => {
+          const { comment } = body;
+          expect(comment.votes).toBe(90);
+        });
+    });
+  });
   describe("DELETE /api/comments/:comment_id", () => {
     it("204: Deletes the correct comment when passed a comment id", () => {
       return request(app)
@@ -377,7 +414,7 @@ describe("app", () => {
           .get("/not-an-existing-path")
           .expect(404)
           .then(({ body }) => {
-            expect(body.msg).toBe("Path Not Found");
+            expect(body.msg).toBe("Not Found");
           });
       });
     });
@@ -443,6 +480,17 @@ describe("app", () => {
             });
         });
         describe("status: 400", () => {
+          it("400: responds with correct message when passed an object with the wrong data type", () => {
+            const testVotePatch = { inc_votes: "six" };
+
+            return request(app)
+              .patch("/api/articles/1")
+              .send(testVotePatch)
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+              });
+          });
           it("400: responds with correct message when sent a invalid parametric endpoint", () => {
             const testVotePatch = { inc_votes: 1 };
 
@@ -456,18 +504,6 @@ describe("app", () => {
           });
           it("400: responds with correct message when passed an empty object", () => {
             const testVotePatch = {};
-
-            return request(app)
-              .patch("/api/articles/1")
-              .send(testVotePatch)
-              .expect(400)
-              .then(({ body }) => {
-                expect(body.msg).toBe("Bad Request");
-              });
-          });
-
-          it("400: responds with correct message when passed an object with the wrong data type", () => {
-            const testVotePatch = { inc_votes: "six" };
 
             return request(app)
               .patch("/api/articles/1")
@@ -502,7 +538,7 @@ describe("app", () => {
           .get("/api/articles/1/comets")
           .expect(404)
           .then(({ body }) => {
-            expect(body.msg).toBe("Path Not Found");
+            expect(body.msg).toBe("Not Found");
           });
       });
     });
@@ -533,7 +569,7 @@ describe("app", () => {
             .send(testNewComment)
             .expect(404)
             .then(({ body }) => {
-              expect(body.msg).toBe("Article ID Does Not Exist");
+              expect(body.msg).toBe("Not Found");
             });
         });
       });
@@ -578,8 +614,67 @@ describe("app", () => {
           });
       });
     });
+    describe("PATCH /api/comments/:comment_id", () => {
+      describe("status: 404", () => {
+        it("404: responds with correct error message when passed a valid but non-existent comment id", () => {
+          const testVotePatch = { inc_votes: 1 };
+
+          return request(app)
+            .patch("/api/comment/1000")
+            .send(testVotePatch)
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Not Found");
+            });
+        });
+        it("404: responds with correct error message when passed when sent an invalid inc_votes value", () => {
+          const testVotePatch = { inc_votes: "invalid vote" };
+
+          return request(app)
+            .patch("/api/comment/1")
+            .send(testVotePatch)
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Not Found");
+            });
+        });
+        it("404: responds with correct error message when passed a valid but non-existent comment id", () => {
+          const testVotePatch = { inc_votes: 1 };
+
+          return request(app)
+            .patch("/api/comment/1000")
+            .send(testVotePatch)
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Not Found");
+            });
+        });
+      });
+      describe("status: 400", () => {
+        it("400: respond with error if comment_id is not a number", () => {
+          const testVotePatch = { inc_votes: 1 };
+
+          return request(app)
+            .patch("/api/comments/four")
+            .send(testVotePatch)
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Bad Request");
+            });
+        });
+        it("400: responds with correct message when passed no votes", () => {
+          return request(app)
+            .patch("/api/comments/2")
+            .send({})
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Bad Request");
+            });
+        });
+      });
+    });
     describe("DELETE /api/comments/:comment_id", () => {
-      test("400: respond with error if comment_id is not a number", () => {
+      it("400: respond with error if comment_id is not a number", () => {
         return request(app)
           .delete("/api/comments/four")
           .expect(400)
@@ -593,7 +688,7 @@ describe("app", () => {
             .delete("/api/comment/1000")
             .expect(404)
             .then(({ body }) => {
-              expect(body.msg).toBe("Path Not Found");
+              expect(body.msg).toBe("Not Found");
             });
         });
       });

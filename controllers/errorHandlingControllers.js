@@ -1,5 +1,5 @@
 exports.handle404Status = (request, response) => {
-  response.status(404).send({ msg: "Path Not Found" });
+  response.status(404).send({ msg: "Not Found" });
 };
 
 exports.handlePSQL400Status = (error, request, response, next) => {
@@ -26,7 +26,7 @@ exports.handleCustom404Errors = (error, request, response, next) => {
   if (error === "Article Not Found") {
     response.status(404).send({ msg: "Article Not Found" });
   } else if (error.code === "23503") {
-    response.status(404).send({ msg: "Article ID Does Not Exist" });
+    response.status(404).send({ msg: "Not Found" });
   } else if (error === "Comment Not Found") {
     response.status(404).send({ msg: "Comment Not Found" });
   } else if (error === "Author Not Found") {
