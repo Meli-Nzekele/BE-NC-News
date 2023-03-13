@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 
 const {
   getTopics,
@@ -20,6 +21,8 @@ const {
   handleCustom400Errors,
   handleCustom404Errors,
 } = require("./controllers/errorHandlingControllers");
+
+app.use(cors());
 
 app.use(express.json());
 
