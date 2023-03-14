@@ -1,3 +1,3 @@
-\c nc_news_test
+\c nc_news
 
-SELECT comments.* FROM comments WHERE comments.article_id = 1 ORDER BY created_at DESC;
+SELECT * FROM articles;
